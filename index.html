@@ -157,6 +157,21 @@
     </div>
 
     <script>
+                const SENHA_CORRETA = "27116"; // Muda para a senha que quiseres
+
+    function verificarAcesso() {
+        let senha = localStorage.getItem("app_password");
+        if (senha !== SENHA_CORRETA) {
+            senha = prompt("Introduza a senha de acesso:");
+            if (senha === SENHA_CORRETA) {
+                localStorage.setItem("app_password", senha);
+            } else {
+                alert("Senha incorreta!");
+                window.location.reload(); // Recarrega para pedir de novo
+            }
+        }
+    }
+    verificarAcesso();
         // ======= SUBSTITUIR PELO TEU URL DO GOOGLE SCRIPT =======
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby230GxWSoGKT-AxFgWaVMCRZdz-e9rcg0urtUJZSpfyeZcoaeXsdVHuLngHe6AZXo/exec"; 
         // ========================================================
@@ -307,4 +322,5 @@
         }
     </script>
 </body>
+
 </html>
