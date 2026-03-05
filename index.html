@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Finanças Familiares</title>
+    
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Finanças">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e293b">
+    
+    <link rel="icon" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        :root { 
+            --primary: #3b82f6; 
+            --bg: #f8fafc; 
+            --tatiana: #db2777; 
+            --francisco: #0369a1; 
+            --success: #10b981; 
+            --dark: #0f172a;
+            --danger: #ef4444;
+        }
+        
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); 
+            padding: env(safe-area-inset-top) 15px 40px 15px; 
+            margin: 0;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #334155;
+        }
+
+        /* PAINEL DE MÉDIA */
+        .daily-box { 
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white; 
+            padding: 30px 20px; 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 500px; 
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .media-label { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+        .media-valor-grande { font-size: 3.5rem; font-weight: 800; margin: 10px 0; display: flex; align-items: baseline; justify-content: center; }
+        .media-valor-grande span { font-size: 1.5rem; margin-left: 4px; opacity: 0.6; }
+
+        .progress-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 1s ease-in-out; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; }
+        .stat-val { font-weight: 700; display: block; font-size: 1.1rem; }
+        .stat-desc { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; font-weight: 700; }
+
+        /* CARTÕES */
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 15px; box-sizing: border-box; }
+        h3 { margin: 0 0 15px 0; font-size: 1rem; color: var(--dark); border-left: 4px solid var(--primary); padding-left: 10px; }
+
+        .acc-group { background: #f1f5f9; padding: 12px; border-radius: 15px; margin-bottom: 12px; }
+        .acc-group h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 0.75rem; text-transform: uppercase; }
+        .acc-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+        .acc-row label { font-size: 0.7rem; width: 60px; color: #64748b; font-weight: 700; }
+        
+        input, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; width: 100%; font-size: 1rem; background: white; -webkit-appearance: none; }
+
+        button { width: 100%; padding: 16px; background: var(--success); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+        .btn-blue { background: var(--primary); margin-top: 15px; }
+        .btn-gray { background: #64748b; margin-top: 15px; font-size: 0.85rem; padding: 12px; }
+        .btn-del { background: #fee2e2; color: var(--danger); padding: 8px; border-radius: 10px; border: none; font-size: 1.1rem; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        td, th { padding: 14px 5px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+        .tag { padding: 4px 8px; border-radius: 6px; color: white; font-size: 0.65rem; font-weight: bold; }
+        .tag-t { background: var(--tatiana); }
+        .tag-f { background: var(--francisco); }
+        .sync-indicator { font-size: 0.7rem; margin-top: 10px; display: none; color: var(--success); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="daily-box">
+        <div class="media-label" id="label-status">Disponível por dia</div>
+        <div class="media-valor-grande" id="media-valor">0.00<span>€</span></div>
+        <div class="progress-container"><div class="progress-bar" id="barra-progresso"></div></div>
+        <div class="stats-grid">
+            <div class="stat-item"><span class="stat-val" id="info-dias-v2">--</span><span class="stat-desc">Dias Restantes</span></div>
+            <div class="stat-item"><span class="stat-val" id="saldo-total-v2">0.00€</span><span class="stat-desc">Saldo Total</span></div>
+        </div>
+        <div id="sync-msg" class="sync-indicator">Sincronizado!</div>
+    </div>
+
+    <div class="card">
+        <h3>Saldos Atuais</h3>
+        <div id="contas-container">
+            <div class="acc-group">
+                <h4>Santander</h4>
+                <div class="acc-row"><label>Ordem</label><input type="number" id="santander_ordem" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+                <div class="acc-row"><label>Poup.</label><input type="number" id="santander_poup" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+            </div>
+            <div class="acc-group">
+                <h4>Montepio</h4>
+                <div class="acc-row"><label>Ordem</label><input type="number" id="montepio_ordem" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+                <div class="acc-row"><label>Poup.</label><input type="number" id="montepio_poup" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+            </div>
+            <div class="acc-group">
+                <h4>BPI</h4>
+                <div class="acc-row"><label>Ordem</label><input type="number" id="bpi_ordem" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+                <div class="acc-row"><label>Poup.</label><input type="number" id="bpi_poup" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+            </div>
+            <div class="acc-group">
+                <h4>ActivoBank</h4>
+                <div class="acc-row"><label>Saldo</label><input type="number" id="activo_saldo" value="0" step="0.01" oninput="atualizarCalculos()"></div>
+            </div>
+        </div>
+        <select id="conta-ativa" onchange="atualizarCalculos()">
+            <option value="santander">Santander (Total)</option>
+            <option value="montepio">Montepio (Total)</option>
+            <option value="bpi">BPI (Total)</option>
+            <option value="activo">ActivoBank</option>
+        </select>
+        <input type="date" id="data-limite" onchange="atualizarCalculos()" style="margin-top: 10px;">
+        <button class="btn-blue" onclick="salvarParaNuvem()">☁️ Guardar na Nuvem</button>
+    </div>
+
+    <div class="card">
+        <h3>Registar Movimento</h3>
+        <div class="acc-row" style="margin-top: 10px;">
+            <select id="quem-gastou" style="flex: 1.2;"><option value="Tatiana">Tatiana</option><option value="Francisco">Francisco</option></select>
+            <input type="text" id="desc-gasto" placeholder="Onde?">
+        </div>
+        <input type="number" id="input-gasto" placeholder="Valor €" step="0.01" style="margin-top: 10px;">
+        <button onclick="fazerGasto()">Confirmar Despesa</button>
+    </div>
+
+    <div class="card">
+        <h3>Histórico</h3>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table id="tabela-historico">
+                <thead><tr style="color: #94a3b8;"><th>Quem</th><th>Local</th><th>Valor</th><th></th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <button class="btn-gray" onclick="exportarCSV()">📥 Exportar CSV</button>
+    </div>
+
+    <script>
+        // ======= SUBSTITUIR PELO TEU URL DO GOOGLE SCRIPT =======
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby230GxWSoGKT-AxFgWaVMCRZdz-e9rcg0urtUJZSpfyeZcoaeXsdVHuLngHe6AZXo/exec"; 
+        // ========================================================
+
+        let historicoCompleto = [];
+
+        window.onload = carregarDaNuvem;
+
+        // Service Worker fictício para PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript,self.addEventListener("fetch", function(event){})');
+        }
+
+        function showStatus(msg) {
+            const el = document.getElementById('sync-msg');
+            el.innerText = msg; el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        async function carregarDaNuvem() {
+            if(!WEB_APP_URL || WEB_APP_URL.includes("COLA_AQUI")) return;
+            try {
+                const response = await fetch(WEB_APP_URL + "?t=" + new Date().getTime());
+                const data = await response.json();
+                if (data.config) {
+                    const c = JSON.parse(data.config);
+                    document.getElementById('santander_ordem').value = c.santander_ordem || 0;
+                    document.getElementById('santander_poup').value = c.santander_poup || 0;
+                    document.getElementById('montepio_ordem').value = c.montepio_ordem || 0;
+                    document.getElementById('montepio_poup').value = c.montepio_poup || 0;
+                    document.getElementById('bpi_ordem').value = c.bpi_ordem || 0;
+                    document.getElementById('bpi_poup').value = c.bpi_poup || 0;
+                    document.getElementById('activo_saldo').value = c.activo_saldo || 0;
+                    document.getElementById('data-limite').value = c.data || "";
+                    document.getElementById('conta-ativa').value = c.ativa || "santander";
+                }
+                historicoCompleto = data.historico || [];
+                renderizarTabela(historicoCompleto);
+                atualizarCalculos();
+            } catch (e) { showStatus("Erro ao sincronizar"); }
+        }
+
+        function atualizarCalculos() {
+            const ativa = document.getElementById('conta-ativa').value;
+            let saldo = 0;
+            const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+            
+            if(ativa === 'santander') saldo = getVal('santander_ordem') + getVal('santander_poup');
+            else if(ativa === 'montepio') saldo = getVal('montepio_ordem') + getVal('montepio_poup');
+            else if(ativa === 'bpi') saldo = getVal('bpi_ordem') + getVal('bpi_poup');
+            else if(ativa === 'activo') saldo = getVal('activo_saldo');
+
+            const dataInput = document.getElementById('data-limite').value;
+            if(!dataInput) return;
+            
+            const hoje = new Date().setHours(0,0,0,0);
+            const dataFim = new Date(dataInput).setHours(0,0,0,0);
+            const diffDias = Math.ceil((dataFim - hoje) / 86400000);
+            
+            const media = (saldo / (diffDias > 0 ? diffDias : 1));
+            document.getElementById('media-valor').innerHTML = media.toFixed(2) + "<span>€</span>";
+            document.getElementById('saldo-total-v2').innerText = saldo.toFixed(2) + "€";
+            document.getElementById('info-dias-v2').innerText = diffDias > 0 ? diffDias : "0";
+
+            const percentagem = Math.min(100, Math.max(0, (diffDias / 30) * 100));
+            document.getElementById('barra-progresso').style.width = percentagem + "%";
+            
+            if (media < 15) {
+                document.getElementById('media-valor').style.color = "#f87171";
+                document.getElementById('label-status').innerText = "⚠️ Orçamento Baixo";
+            } else {
+                document.getElementById('media-valor').style.color = "#60a5fa";
+                document.getElementById('label-status').innerText = "Disponível por dia";
+            }
+        }
+
+        async function fazerGasto() {
+            const valor = parseFloat(document.getElementById('input-gasto').value);
+            const desc = document.getElementById('desc-gasto').value || "Gasto";
+            const quem = document.getElementById('quem-gastou').value;
+            const ativa = document.getElementById('conta-ativa').value;
+            if(!valor || valor <= 0) return;
+
+            const campoId = ativa === 'activo' ? 'activo_saldo' : ativa + '_ordem';
+            document.getElementById(campoId).value = (parseFloat(document.getElementById(campoId).value) - valor).toFixed(2);
+            
+            const novaLinha = [new Date().toLocaleDateString('pt-PT'), quem, desc, valor.toFixed(2), ativa];
+            historicoCompleto.push(novaLinha);
+            renderizarTabela(historicoCompleto);
+            atualizarCalculos();
+
+            showStatus("A guardar...");
+            await fetch(WEB_APP_URL, { method: "POST", mode: 'no-cors', body: JSON.stringify({ tipo: "NOVO_GASTO", data: novaLinha[0], quem, local: desc, valor: valor.toFixed(2), conta: ativa }) });
+            await salvarParaNuvem();
+            document.getElementById('input-gasto').value = ""; document.getElementById('desc-gasto').value = "";
+        }
+
+        async function apagarGasto(data, quem, local, valor, contaOrigem) {
+            if(!confirm("Remover registo?")) return;
+            const campoId = contaOrigem === 'activo' ? 'activo_saldo' : contaOrigem + '_ordem';
+            document.getElementById(campoId).value = (parseFloat(document.getElementById(campoId).value) + parseFloat(valor)).toFixed(2);
+            historicoCompleto = historicoCompleto.filter(r => !(r[1]===quem && r[2]===local && r[3]==valor));
+            renderizarTabela(historicoCompleto);
+            atualizarCalculos();
+            showStatus("A apagar...");
+            await fetch(WEB_APP_URL, { method: "POST", mode: 'no-cors', body: JSON.stringify({ tipo: "DELETE_GASTO", quem, local, valor }) });
+            await salvarParaNuvem();
+        }
+
+        async function salvarParaNuvem() {
+            const config = {
+                santander_ordem: document.getElementById('santander_ordem').value,
+                santander_poup: document.getElementById('santander_poup').value,
+                montepio_ordem: document.getElementById('montepio_ordem').value,
+                montepio_poup: document.getElementById('montepio_poup').value,
+                bpi_ordem: document.getElementById('bpi_ordem').value,
+                bpi_poup: document.getElementById('bpi_poup').value,
+                activo_saldo: document.getElementById('activo_saldo').value,
+                data: document.getElementById('data-limite').value,
+                ativa: document.getElementById('conta-ativa').value
+            };
+            await fetch(WEB_APP_URL, { method: "POST", mode: 'no-cors', body: JSON.stringify({ tipo: "SAVE_STATE", conteudo: config }) });
+            showStatus("Sincronizado!");
+        }
+
+        function renderizarTabela(dados) {
+            const corpo = document.querySelector("#tabela-historico tbody");
+            corpo.innerHTML = "";
+            if(!dados || dados.length <= 1) return;
+            [...dados].slice(1).reverse().slice(0, 10).forEach(row => {
+                const tag = row[1] === "Tatiana" ? "tag-t" : "tag-f";
+                corpo.innerHTML += `<tr>
+                    <td><span class="tag ${tag}">${row[1]}</span></td>
+                    <td>${row[2]}</td>
+                    <td><b>${row[3]}€</b></td>
+                    <td><button class="btn-del" onclick="apagarGasto('${row[0]}','${row[1]}','${row[2]}','${row[3]}','${row[4]}')">🗑️</button></td>
+                </tr>`;
+            });
+        }
+
+        function exportarCSV() {
+            let csv = "\uFEFFData;Quem;Local;Valor;Conta\n";
+            historicoCompleto.slice(1).forEach(row => { csv += row.join(";") + "\n"; });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Financas.csv"; link.click();
+        }
+    </script>
+</body>
+</html>
